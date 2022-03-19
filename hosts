@@ -1,0 +1,6 @@
+[web]
+54.89.238.1 ansible_user=ubuntu
+
+
+[other]
+54.165.170.155

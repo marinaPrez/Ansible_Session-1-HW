@@ -1,0 +1,21 @@
+---
+- name: Update web servers
+  hosts: web
+  #remote_user: root
+
+  tasks:
+  - name: Create directories
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+      -  ~/opsschool
+      -  ~/opsschool/ansible
+  - name: Create user
+    become: true
+    user: 
+      name: opsschool
+      #password: "0p$Sch00l"    need to be hashed 
+      password: $6$cOQ4g05sKxhOhAz$9heOoYZZGovZTbfhZy.EddpArPXgmxhD2UwFIC9o8UtKW/oItCgt4D2HJCUJZq95iPUxuKcIAtTKX5E6qO.q/1
+      state: present 
+      createhome: yes
