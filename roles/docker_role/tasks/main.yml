@@ -1,2 +1,92 @@
 ---
 # tasks file for roles/docker_role
+
+  - name: Update  package index
+    become: yes
+    apt:
+      update_cache: yes
+    when: ansible_os_family == "Debian"  
+
+ 
+  - name: Update  package index
+    become: yes
+    yum:
+      update_cache: yes
+    when: ansible_os_family == "RedHat"
+
+
+  - name: Install dependancy packages on  Ubuntu Server
+    become: yes
+    apt:
+      pkg:
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+      - python3-pip
+      - python3-docker
+    when: ansible_os_family == "Debian"  
+ 
+  - name: Install dependancy packages on RedHat  Server
+    become: yes
+    yum:
+      pkg:
+      - ca-certificates
+      - curl
+      - gnupg
+      #- lsb-release
+      - python3-pip
+      #- python3-docker
+    when: ansible_os_family == "RedHat"
+ 
+  - name: Add Docker’s official GPG key
+    become: yes
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+    when: ansible_os_family == "Debian"
+    
+  - name: Add Docker’s official GPG key for REHL
+    become: yes
+    rpm_key:
+      key: "https://download.docker.com/linux/rhel/gpg" 
+      state: present
+    when: ansible_os_family == "RedHat"
+
+  - name: set up the repository
+    become: yes
+    apt_repository:
+      repo:  deb https://download.docker.com/linux/ubuntu focal stable
+    when: ansible_os_family == "Debian"
+
+  - name: set up the repository for RHEL
+    become: yes
+    get_url:
+        url: "{{ docker_repo }}"
+        dest: /etc/yum.repos.d/docer-ce.repo
+    when: ansible_os_family == "RedHat"  
+
+  - name: Install docker on  Ubuntu Server
+    become: yes
+    apt:
+      pkg:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    when: ansible_os_family == "Debian"
+
+  - name: Install docker on  RedHat Server
+    become: yes
+    yum:
+      name:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+      state: latest
+    when: ansible_os_family == "RedHat"
+  
+  - name: install python module of docker
+    become: yes
+    pip:
+      name: docker
+    notify: restart docker

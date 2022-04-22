@@ -1,2 +1,12 @@
 ---
 # tasks file for roles/ngnx_role
+
+  - name: install ngnx
+    become: yes
+    docker_container:
+      name: ngnx_instance
+      image: nginx
+      state: present
+      auto_remove: True
+      ports:
+      - "8080:80"

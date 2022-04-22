@@ -1,67 +1,14 @@
 ---
-- name: Setup Docker
-  hosts: _Node0, _Node1
-  remote_user: ubuntu
+- name: Setup Docker and ngnx
+  hosts: 
+    _rhel, 
+    _ubuntu, 
+  remote_user: "{{ 'ubuntu' if tags.server_type  == 'ubuntu'  else 'ec2-user' }}"
 
-  tasks:
-  - name: Update  package index
-    become: yes
-    apt:
-      update_cache: yes
-  - name: Install packages
-    become: yes
-    apt:
-      pkg:
-      - ca-certificates
-      - curl
-      - gnupg
-      - lsb-release  
-  
-  - name: Add Docker’s official GPG key
-    #ansible.builtin.shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-    become: yes
-    apt_key:
-      url: https://download.docker.com/linux/ubuntu/gpg
-      state: present
+  #hosts: _rhel_node
+  #remote_user: ec2-user
 
+  roles:
+  - docker_role
+  - ngnx_role
 
-  - name: set up the repository
-    become: yes
-    #ansible.builtin.shell: >
-      #echo  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    apt_repository:
-      repo:  deb https://download.docker.com/linux/ubuntu focal stable
-  - name: Update  package index
-    become: yes
-    apt:
-      update_cache: yes
-  
-  - name: Install docker
-    become: yes
-    apt:
-      pkg:
-      - docker-ce 
-      - docker-ce-cli
-      - containerd.io  
-      - python3-pip 
-      - python3-docker  
-  
-  - name: install python module of docker
-    pip:
-      name: docker 
-
-  - name: install ngnx
-    become: yes
-    docker_container:
-      name: ngnx_instance
-      image: nginx
-      state: present
-      auto_remove: True
-      ports:
-      - "8080:80"
-
-  handlers:
-    - name: restart docker
-      service:
-        name: docker
-        state: restarted       
